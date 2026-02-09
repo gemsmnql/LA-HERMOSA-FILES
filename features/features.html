@@ -1,0 +1,100 @@
+<section class="features-page">
+  <div class="path flex gap-[5px] items-center text-[15px] mx-[120px] mt-[50px]">
+        <p class = "text-gray-400">Home</p>
+        <i class="fa-solid fa-circle fa-2xs" style="color: #6F0E35"></i>
+        <p class="font-bold" style="color:#6F0E35">Features</p>
+    </div>
+    <header class="hero-section mx-[120px]">
+    <div class="hero-left">
+      <h1 class="main-title text-[200px] leading-[1]">Features</h1>
+      <p class = "text-[15px]">You’ll love it for the elegant blooms, thoughtful curation, and seamless ordering. <br>
+        They’ll love it for the joy, surprise, and beauty it brings to their day.</p>
+    </div>
+    <div class="hero-right max-w-[40%] mt-[250px]">
+      <h2 class="text-[55px] mt-4 text-start leading-[80%]">Surprisingly seamless flower gifting</h2>
+      <p class="text-[15px] text-right">
+        We crafted a flower shop experience that makes every gesture feel effortless yet unforgettable. From spontaneous surprises to grand occasions, La hermosa elevates the way you give and receive flowers — in just a few simple steps.
+      </p>
+    </div>
+  </header>
+
+  <section class="services-container mt-[100px]">
+    <h2 class="section-heading text-[70px]">Our Floral Services</h2>
+    <div class="services-timeline">
+      <div class="timeline-curve"></div>
+      <div class="service-items">
+        <div class="service-item">
+          <div class="dot1"></div>
+          <h3 class = "text-left">Event Floral Styling</h3>
+          <p class = "text-left">Planning something big? We do<br> weddings, birthdays, and corporate<br> events with style and grace.</p>
+        </div>
+        <div class="service-item-2 ">
+          <div class="dot2"></div>
+          <h3 class = "text-[2rem] font-bold text-center">Curated Floral Collections</h3>
+          <p class = "text-center mt-[10px]">Discover handcrafted arrangements<br> tailored for every mood and milestone.</p>
+        </div>
+        <div class="service-item">
+          <div class="dot3"></div>
+          <h3 class = "text-right">Personalized Message</h3>
+          <p class = "text-right">Add a heart-felt note with every<br> bouquet. We'll make sure your<br> message is delivered beautifully.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="gallery-container mt-[200px]">
+    <h2 class="section-heading text-[70px]">Our Gallery</h2>
+    
+    <div class="gallery-filters">
+      <span class="filter" [class.active]="selectedFilter === 'Images'" (click)="setFilter('Images')">Images</span>
+      <span class="filter" [class.active]="selectedFilter === 'Videos'" (click)="setFilter('Videos')">Videos</span>
+      <span class="filter" [class.active]="selectedFilter === 'All'" (click)="setFilter('All')">All</span>
+    </div>
+
+    <div class="gallery-grid" *ngIf="selectedFilter === 'Images' || selectedFilter === 'All'">
+      <div class="left-column">
+        <div class="grid-item item-tall">
+          <img src="assets/images/gallery1.jpg" alt="Girl with large bouquet">
+        </div>
+        <div class="grid-item item-small-square">
+          <img src="assets/images/gallery5.jpg" alt="Sunflower">
+        </div>
+        <div class="grid-item item-small-square">
+          <img src="assets/images/gallery5.jpg" alt="Sunflower">
+        </div>
+        <div class="grid-item item-bottom-wide">
+          <img src="assets/images/gallery4.jpg" alt="Colorful flower strip">
+        </div>
+      </div>
+
+      <div class="right-column">
+        <div class="grid-item item-top-pair">
+          <img src="assets/images/gallery2.jpg" alt="Flower top left">
+        </div>
+        <div class="grid-item item-top-pair">
+          <img src="assets/images/gallery3.jpg" alt="Flower top right">
+        </div>
+        <div class="grid-item item-church-wide">
+          <img src="assets/images/gallery4.jpg" alt="Church aisle">
+        </div>
+
+        <div class="grid-item item-large-arch">
+          <img *ngIf="selectedFilter === 'Images'" src="assets/images/gallery6.jpg" alt="Pink floral arch">
+          
+          <video *ngIf="selectedFilter === 'All'" controls poster="/image17.png">
+            <source src="/video1.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      </div>
+    </div>
+
+    <div class="video-grid" *ngIf="selectedFilter === 'Videos'">
+      <div class="grid-item video-full-width">
+        <video controls>
+          <source src="/video1.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </section>
+</section>
