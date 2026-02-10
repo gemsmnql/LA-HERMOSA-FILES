@@ -60,6 +60,10 @@ app.post('/api/blogs', async (req, res) => {
   }
 });
 
+app.get('/', (req, res) => {
+  res.send('Backend is running successfully!');
+});
+
 app.get('/api/blogs', async (req, res) => {
   try {
     const blogs = await Blog.find().sort({ createdAt: -1 });
