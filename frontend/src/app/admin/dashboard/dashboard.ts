@@ -40,7 +40,7 @@ export class DashboardComponent implements OnInit {
 
   fetchBlogs() {
     this.isLoading = true;
-    this.http.get<any[]>('http://localhost:3000/api/blogs').subscribe({
+    this.http.get<any[]>('https://la-hermosa-files.onrender.com/api/blogs').subscribe({
       next: (data) => {
         this.allBlogs = data;
         this.isLoading = false;
@@ -55,7 +55,7 @@ export class DashboardComponent implements OnInit {
 
   onPostBlog() {
     this.isLoading = true;
-    this.http.post('http://localhost:3000/api/blogs', this.blogData).subscribe({
+    this.http.post('https://la-hermosa-files.onrender.com/api/blogs', this.blogData).subscribe({
       next: () => {
         this.isModalOpen = false;
         this.resetForm();
@@ -73,7 +73,7 @@ export class DashboardComponent implements OnInit {
 
   deleteBlog(id: string) {
     if (confirm('Delete this blog?')) {
-      this.http.post(`http://localhost:3000/api/blogs/delete/${id}`, {}).subscribe({
+      this.http.post(`'https://la-hermosa-files.onrender.com/api/blogs/delete/${id}`, {}).subscribe({
         next: () => {
           this.fetchBlogs(); 
           this.cdr.detectChanges();
