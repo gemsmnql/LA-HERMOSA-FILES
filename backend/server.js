@@ -102,9 +102,10 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
   }
 });
 
+// Use Render's dynamic port, defaulting to 3000 for local testing
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+// IMPORTANT: Added '0.0.0.0' to allow external connections on Render
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend Server running on port ${PORT}`);
 });
-
