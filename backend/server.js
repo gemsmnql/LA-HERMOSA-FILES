@@ -3,16 +3,22 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('./models/admin');
+const User = require('./models/Admin');
 const Blog = require('./models/Blogs'); 
 require('dotenv').config();
 
 const app = express();
 
+// --- FIXED CORS: Allows your live website to talk to this backend ---
 app.use(cors({
-  origin: [process.env.FRONTEND_URL, 'http://localhost:4200'].filter(Boolean),
+  origin: [
+    'https://lahermosa.shop',
+    'https://www.lahermosa.shop',
+    'http://localhost:4200'
+  ],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
 app.use(express.json());
@@ -21,6 +27,12 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected Successfully"))
   .catch(err => console.error("MongoDB Connection Error:", err));
 
+// --- NEW: Verification Route (to fix the "Cannot GET /" screen) ---
+app.get('/', (req, res) => {
+  res.send('Backend is running successfully! API is live.');
+});
+
+// --- ADMIN LOGIN ---
 app.post('/api/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -37,6 +49,7 @@ app.post('/api/admin/login', async (req, res) => {
   }
 });
 
+// --- CREATE BLOG ---
 app.post('/api/blogs', async (req, res) => {
   try {
     const { title, imageUrl, altText, header1, content, imageUrl2, altText2, header2, content2, isFeatured } = req.body;
@@ -52,6 +65,7 @@ app.post('/api/blogs', async (req, res) => {
   }
 });
 
+// --- GET ALL BLOGS ---
 app.get('/api/blogs', async (req, res) => {
   try {
     const blogs = await Blog.find().sort({ createdAt: -1 });
@@ -61,6 +75,7 @@ app.get('/api/blogs', async (req, res) => {
   }
 });
 
+// --- GET SINGLE BLOG DETAIL ---
 app.get('/api/blogs/:id', async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id);
@@ -71,6 +86,7 @@ app.get('/api/blogs/:id', async (req, res) => {
   }
 });
 
+// --- DELETE BLOG ---
 app.post('/api/blogs/delete/:id', async (req, res) => {
   try {
     const { id } = req.params;
@@ -81,5 +97,8 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
   }
 });
 
+// --- FIXED PORT: Essential for Render Deployment ---
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Backend Server running on port ${PORT}`));
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Backend Server running on port ${PORT}`);
+});
