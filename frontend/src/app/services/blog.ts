@@ -9,7 +9,7 @@ export class BlogService {
   private http = inject(HttpClient);
   
   // Update this to your live Render URL
-  private apiUrl = 'https://la-her-mosa-files.onrender.com/api/blogs';
+  private apiUrl = 'https://la-hermosa-files.onrender.com/api/blogs';
 
   // Get all blogs
   getBlogs(): Observable<any[]> {
