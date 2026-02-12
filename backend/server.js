@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('./models/Admin');
+const User = require('./models/admin');
 const Blog = require('./models/Blogs'); 
 require('dotenv').config();
 
