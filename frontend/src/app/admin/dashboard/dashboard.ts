@@ -18,11 +18,11 @@ export class DashboardComponent implements OnInit {
 
   isModalOpen = false;
   isLoading = false;
-  allBlogs: any[] = []; 
+  allBlogs: any[] = [];
 
-  // Object keys must match the Mongoose schema exactly
   blogData = {
     title: '',
+    author: '', 
     imageUrl: '',
     altText: '',
     header1: '',
@@ -40,11 +40,11 @@ export class DashboardComponent implements OnInit {
 
   fetchBlogs() {
     this.isLoading = true;
-    this.http.get<any[]>('https://la-hermosa-files.onrender.com/api/blogs').subscribe({
+    this.http.get<any[]>('http://localhost:3000/api/blogs').subscribe({
       next: (data) => {
         this.allBlogs = data;
         this.isLoading = false;
-        this.cdr.detectChanges(); 
+        this.cdr.detectChanges();
       },
       error: (err) => {
         console.error('Fetch error:', err);
@@ -55,7 +55,7 @@ export class DashboardComponent implements OnInit {
 
   onPostBlog() {
     this.isLoading = true;
-    this.http.post('https://la-hermosa-files.onrender.com/api/blogs', this.blogData).subscribe({
+    this.http.post('http://localhost:3000/api/blogs', this.blogData).subscribe({
       next: () => {
         this.isModalOpen = false;
         this.resetForm();
@@ -73,9 +73,9 @@ export class DashboardComponent implements OnInit {
 
   deleteBlog(id: string) {
     if (confirm('Delete this blog?')) {
-      this.http.post(`'https://la-hermosa-files.onrender.com/api/blogs/delete/${id}`, {}).subscribe({
+      this.http.post(`http://localhost:3000/api/blogs/delete/${id}`, {}).subscribe({
         next: () => {
-          this.fetchBlogs(); 
+          this.fetchBlogs();
           this.cdr.detectChanges();
         },
         error: (err) => console.error('Delete failed', err)
@@ -85,7 +85,7 @@ export class DashboardComponent implements OnInit {
 
   resetForm() {
     this.blogData = {
-      title: '', imageUrl: '', altText: '', header1: '', content: '',
+      title: '', author: '', imageUrl: '', altText: '', header1: '', content: '',
       imageUrl2: '', altText2: '', header2: '', content2: '', isFeatured: false
     };
   }
