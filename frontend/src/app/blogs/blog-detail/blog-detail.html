@@ -1,5 +1,5 @@
 <div *ngIf="blog" class="mx-[120px] px-6 py-12 animate-in fade-in slide-in-from-bottom-4 duration-700 blog-detail-container">
-  
+ 
    <div class="flex justify-between items-center mb-6 lg:mb-10">
         <div class="flex items-center gap-4">
             <button (click)="goBack()" class="back-btn shrink-0">
@@ -13,15 +13,15 @@
     </div>
 
   <div class="main-image relative">
-    <img 
-      [src]="blog.imageUrl" 
-      [alt]="blog.altText || ''" 
+    <img
+      [src]="blog.imageUrl"
+      [alt]="blog.altText || ''"
       class="w-full h-[500px] object-cover mt-[20px] brightness-65 rounded-2xl responsive-img-height"
     >
     <h1 class="absolute text-center leading-[90%] w-full px-4 responsive-main-title">
       {{ blog.title }}
     </h1>
-    
+   
     <div class="blog-author flex flex-col md:flex-row lg:flex-row text-center md:justify-between lg:justify-between mt-[20px] text-gray-500 font-sans text-sm">
         <p>Created By: <span class="font-bold text-[#6F0E35]">{{ blog.author || 'Admin' }}</span></p>
         <p>Published On: <span class="font-bold text-[#6F0E35]">{{ blog.createdAt | date:'MMMM d, y' }}</span></p>
@@ -34,9 +34,9 @@
   </div>
 
   <div class="main-image">
-      <img 
-        [src]="blog.imageUrl2" 
-        [alt]="blog.altText2 || ''" 
+      <img
+        [src]="blog.imageUrl2"
+        [alt]="blog.altText2 || ''"
         class="w-full h-[500px] object-contain mt-[20px] responsive-img-height"
       >
   </div>
