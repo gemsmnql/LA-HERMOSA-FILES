@@ -1,7 +1,5 @@
 User-agent: *
 Allow: /
 
-# Disallow: /admin/
-
-# Link to your sitemap (update this once you have your domain)
-Sitemap: http://example.shop/sitemap.xml
+# Link to your live sitemap
+Sitemap: https://lahermosa.shop/sitemap.xml
