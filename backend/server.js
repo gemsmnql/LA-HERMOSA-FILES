@@ -4,12 +4,11 @@ const cors = require('cors');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('./models/admin');
-const Blog = require('./models/Blogs'); 
+const Blog = require('./models/Blogs');
 require('dotenv').config();
 
 const app = express();
 
-// --- FIXED CORS: Allows your live website to talk to this backend ---
 app.use(cors({
   origin: [
     'https://lahermosa.shop',
@@ -27,7 +26,6 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected Successfully"))
   .catch(err => console.error("MongoDB Connection Error:", err));
 
-// --- NEW: Verification Route (to fix the "Cannot GET /" screen) ---
 app.get('/', (req, res) => {
   res.send('Backend is running successfully! API is live.');
 });
@@ -52,10 +50,18 @@ app.post('/api/admin/login', async (req, res) => {
 // --- CREATE BLOG ---
 app.post('/api/blogs', async (req, res) => {
   try {
-    const { title, imageUrl, altText, header1, content, imageUrl2, altText2, header2, content2, isFeatured } = req.body;
-    const newBlog = new Blog({ 
-      title, imageUrl, altText, header1, content, 
-      imageUrl2, altText2, header2, content2, 
+    const { title, author, imageUrl, altText, header1, content, imageUrl2, altText2, header2, content2, isFeatured } = req.body;
+    const newBlog = new Blog({
+      title,
+      author, // Field successfully mapped to the Mongoose Schema
+      imageUrl,
+      altText,
+      header1,
+      content,
+      imageUrl2,
+      altText2,
+      header2,
+      content2,
       isFeatured: isFeatured === true || isFeatured === 'true'
     });
     await newBlog.save();
@@ -97,7 +103,6 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
   }
 });
 
-// --- FIXED PORT: Essential for Render Deployment ---
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend Server running on port ${PORT}`);
