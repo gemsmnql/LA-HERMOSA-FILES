@@ -53,7 +53,7 @@ app.post('/api/blogs', async (req, res) => {
     const { title, author, imageUrl, altText, header1, content, imageUrl2, altText2, header2, content2, isFeatured } = req.body;
     const newBlog = new Blog({
       title,
-      author, // Field successfully mapped to the Mongoose Schema
+      author, 
       imageUrl,
       altText,
       header1,
@@ -101,6 +101,54 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// --- SITEMAP GENERATION WITH LASTMOD ---
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+      // Fetch IDs and creation dates for dynamic links
+      const blogs = await Blog.find({}, '_id createdAt'); 
+      const today = new Date().toISOString().split('T')[0];
+      
+      let xml = `<?xml version="1.0" encoding="UTF-8"?>`;
+      xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+      
+      // 1. Static Pages
+      const staticPages = [
+        { url: '', priority: '1.0' },
+        { url: 'shop', priority: '0.8' },
+        { url: 'blog', priority: '0.8' },
+        { url: 'contact', priority: '0.5' },
+        { url: 'features', priority: '0.5' }
+      ];
+
+      staticPages.forEach(page => {
+        xml += `
+          <url>
+            <loc>https://lahermosa.shop/${page.url}</loc>
+            <lastmod>${today}</lastmod>
+            <priority>${page.priority}</priority>
+          </url>`;
+      });
+  
+      // 2. Dynamic Blog Detail Pages
+      blogs.forEach(blog => {
+        const blogDate = blog.createdAt ? new Date(blog.createdAt).toISOString().split('T')[0] : today;
+        xml += `
+          <url>
+            <loc>https://lahermosa.shop/blog-detail/${blog._id}</loc>
+            <lastmod>${blogDate}</lastmod>
+            <priority>0.7</priority>
+          </url>`;
+      });
+  
+      xml += `</urlset>`;
+  
+      res.header('Content-Type', 'application/xml');
+      res.send(xml);
+    } catch (err) {
+      res.status(500).send("Error generating sitemap");
+    }
 });
 
 const PORT = process.env.PORT || 3000;
