@@ -1,29 +1,41 @@
-import { Component, signal, inject, OnInit } from '@angular/core'; // Added inject and OnInit
-import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router'; // Added Router
+import { Component, signal, inject, OnInit } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet, NavigationEnd } from '@angular/router'; // Added NavigationEnd
 import { Header } from './header/header';
 import { Footer } from './footer/footer';
-// DELETE this line: import { HttpClientModule } from '@angular/common/http';
+import { filter } from 'rxjs/operators'; // Added filter
+
+// Declare gtag as a global function so TypeScript doesn't throw an error
+declare let gtag: Function;
 
 @Component({
   selector: 'app-root',
-  // REMOVE HttpClientModule from the array below
   imports: [RouterLink, RouterOutlet, Header, RouterLinkActive, Footer],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
-export class App implements OnInit { // Added implements OnInit
+export class App implements OnInit {
   protected readonly title = signal('la-hermosa');
   
-  // Added router injection
   private router = inject(Router);
 
   ngOnInit() {
-    // Added a manual check for direct URL entry security
+    // 1. Existing security check for direct URL entry
     const currentPath = window.location.pathname;
     const token = localStorage.getItem('token');
 
     if (currentPath.includes('/admin/dashboard') && !token) {
       this.router.navigate(['/admin/login']);
     }
+
+    // 2. Added Google Analytics Page Tracking Logic
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      if (typeof gtag !== 'undefined') {
+        gtag('config', 'G-QM2JC7CQC6', { // <--- REPLACE WITH YOUR ACTUAL G-ID
+          'page_path': event.urlAfterRedirects
+        });
+      }
+    });
   }
 }
