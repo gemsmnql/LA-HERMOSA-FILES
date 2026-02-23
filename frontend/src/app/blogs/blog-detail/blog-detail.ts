@@ -1,7 +1,8 @@
-import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core'; // 1. Import ChangeDetectorRef
+import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { BlogService } from '../../services/blog';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; // 1. Added imports
 
 @Component({
   selector: 'app-blog-detail',
@@ -13,11 +14,13 @@ import { BlogService } from '../../services/blog';
 export class BlogDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private blogService = inject(BlogService);
-  private cdr = inject(ChangeDetectorRef); // 2. Inject it here
+  private cdr = inject(ChangeDetectorRef);
   private location = inject(Location);
+  private sanitizer = inject(DomSanitizer); // 2. Inject Sanitizer
 
   blog: any = null;
   isLoading = true;
+  dynamicSchema: SafeHtml | undefined; // 3. Added schema variable
 
   ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
@@ -30,12 +33,13 @@ export class BlogDetailComponent implements OnInit {
     this.isLoading = true;
     this.blogService.getBlogById(id).subscribe({
       next: (data) => {
-        // Use a small timeout if you want to ensure the "loading thingy" is seen here too
         setTimeout(() => {
           this.blog = data;
           this.isLoading = false;
           
-          // 3. FORCE the UI to wake up and show the blog content
+          // 4. Generate the Schema when data arrives
+          this.generateBlogSchema(data); 
+          
           this.cdr.detectChanges(); 
         }, 500);
       },
@@ -47,7 +51,39 @@ export class BlogDetailComponent implements OnInit {
     });
   }
 
-  // Add this function to fix the error
+  // 5. Added the Schema Generator Function
+  generateBlogSchema(blog: any) {
+    const schemaJson = {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      "headline": blog.title,
+      "description": blog.content ? blog.content.substring(0, 160) : '',
+      "image": [blog.imageUrl, blog.imageUrl2].filter(img => img),
+      "author": {
+        "@type": "Person",
+        "name": blog.author || "La Hermosa Admin"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "La Hermosa Flower Shop",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://lahermosa.shop/assets/images/favlogo.png"
+        }
+      },
+      "datePublished": blog.createdAt || new Date().toISOString(),
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": `https://lahermosa.shop/blog-detail/${blog._id}`
+      }
+    };
+
+    const jsonString = JSON.stringify(schemaJson);
+    this.dynamicSchema = this.sanitizer.bypassSecurityTrustHtml(
+      `<script type="application/ld+json">${jsonString}</script>`
+    );
+  }
+
   goBack() {
     this.location.back();
   }
