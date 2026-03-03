@@ -49,8 +49,8 @@ export class Home implements OnInit {
     this.isLoadingBlogs = true;
     this.blogService.getBlogs().subscribe({
       next: (data) => {
-        // We take the first 3 from the database
-        this.blogs = data.slice(0, 3);
+        // Take the first 3 latest posts
+        this.blogs = (data || []).slice(0, 3);
         this.isLoadingBlogs = false;
         this.cdr.detectChanges(); 
       },
@@ -60,5 +60,11 @@ export class Home implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  // Helper to handle both external URLs and local uploads
+  getImageUrl(url: string): string {
+    if (!url) return 'https://placehold.co/400x300?text=La+Hermosa';
+    return url;
   }
 }
