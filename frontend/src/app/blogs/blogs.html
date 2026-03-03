@@ -42,43 +42,47 @@
             </div>
 
             <div *ngIf="!isLoading && blogPosts.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 responsive-grid animate-in fade-in duration-700">
-                <article *ngFor="let article of blogPosts" [routerLink]="['/blogs', article._id]"
+                <article *ngFor="let article of blogPosts" [routerLink]="['/blogs', article._id || article.id]"
                     class="group rounded-2xl overflow-hidden shadow-lg relative transition duration-500 hover:shadow-2xl cursor-pointer responsive-card">
-                    <img [src]="article.imageUrl" [alt]="article.altText" class="w-full h-[420px] object-cover transition duration-500 group-hover:scale-110">
+                    <img [src]="getImageUrl(article.imageUrl)" [alt]="article.altText || ''" 
+                         class="w-full h-[420px] object-cover transition duration-500 group-hover:scale-110"
+                         onerror="this.src='https://placehold.co/400x600?text=La+Hermosa'">
                     <div class="absolute inset-0 bg-black/20 group-hover:bg-black/40"></div>
                     <div class="card-details absolute bottom-0 p-6 text-white bg-gradient-to-t from-black/80 to-transparent w-full">
-                        <h3 class="text-[30px]">{{ article.title }}</h3>
-                        <p class="text-xs ">{{ article.createdAt | date:'MM/dd/yyyy' }}</p>
-                        <p class="text-sm mt-2 opacity-90">{{ article.content | slice:0:100 }}...</p>
+                        <h3 class="text-[30px] leading-tight">{{ article.title }}</h3>
+                        <p class="text-xs">{{ article.createdAt | date:'MM/dd/yyyy' }}</p>
+                        <p class="text-sm mt-2 opacity-90 line-clamp-2">{{ article.content }}</p>
                     </div>
                 </article>
             </div>
         </div>
 
         <div class="w-1/4 space-y-10 sidebar-column">
-            <div *ngIf="!isLoading" class="space-y-6 animate-in fade-in duration-700">
-                <div *ngFor="let item of featuredPosts" [routerLink]="['/blogs', item._id]"
+            <div *ngIf="!isLoading && featuredPosts.length > 0" class="space-y-6 animate-in fade-in duration-700">
+                <div *ngFor="let item of featuredPosts" [routerLink]="['/blogs', item._id || item.id]"
                      class="group flex gap-4 p-3 rounded-xl transition hover:bg-gray-100 cursor-pointer">
-                    <img [src]="item.imageUrl" [alt]="item.altText" class="w-20 h-20 object-cover rounded-xl shadow-sm">
+                    <img [src]="getImageUrl(item.imageUrl)" [alt]="item.altText || ''" 
+                         class="w-20 h-20 object-cover rounded-xl shadow-sm">
                     <div>
                         <p class="text-xs text-gray-400">{{ item.createdAt | date:'MMMM d, y' }}</p>
-                        <p class="font-medium text-sm">{{ item.title }}</p>
+                        <p class="font-medium text-sm line-clamp-2">{{ item.title }}</p>
                     </div>
                 </div>
             </div>
 
-            <div *ngIf="!isLoading" class="animate-in fade-in duration-700">
+            <div *ngIf="!isLoading && latestPosts.length > 0" class="animate-in fade-in duration-700">
                 <div class="right-article flex items-center gap-[10px] mb-6">
                     <h2 class="text-[40px] whitespace-nowrap">Latest</h2>
                     <div class="h-[2px] bg-gray-300 w-full ml-6"></div>
                 </div>
                 <div class="space-y-6">
-                    <div *ngFor="let item of latestPosts" [routerLink]="['/blogs', item._id]"
+                    <div *ngFor="let item of latestPosts" [routerLink]="['/blogs', item._id || item.id]"
                          class="flex gap-4 group cursor-pointer p-3 rounded-xl transition hover:bg-gray-100">
-                        <img [src]="item.imageUrl" [alt]="item.altText" class="w-20 h-20 object-cover rounded-xl">
+                        <img [src]="getImageUrl(item.imageUrl)" [alt]="item.altText || ''" 
+                             class="w-20 h-20 object-cover rounded-xl">
                         <div>
                             <p class="text-xs text-gray-400">{{ item.createdAt | date:'MMMM d, y' }}</p>
-                            <p class="font-medium text-sm">{{ item.title }}</p>
+                            <p class="font-medium text-sm line-clamp-2">{{ item.title }}</p>
                         </div>
                     </div>
                 </div>
