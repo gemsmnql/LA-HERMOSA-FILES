@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectorRef } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { BlogService } from '../../services/blog';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser'; // 1. Added imports
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-blog-detail',
@@ -16,13 +16,14 @@ export class BlogDetailComponent implements OnInit {
   private blogService = inject(BlogService);
   private cdr = inject(ChangeDetectorRef);
   private location = inject(Location);
-  private sanitizer = inject(DomSanitizer); // 2. Inject Sanitizer
+  private sanitizer = inject(DomSanitizer);
 
   blog: any = null;
   isLoading = true;
-  dynamicSchema: SafeHtml | undefined; // 3. Added schema variable
+  dynamicSchema: SafeHtml | undefined;
 
   ngOnInit() {
+    // Correctly getting ID from the 'blogs/:id' route
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.fetchBlogDetail(id);
@@ -37,7 +38,7 @@ export class BlogDetailComponent implements OnInit {
           this.blog = data;
           this.isLoading = false;
           
-          // 4. Generate the Schema when data arrives
+          // Generate the Schema when data arrives
           this.generateBlogSchema(data); 
           
           this.cdr.detectChanges(); 
@@ -51,14 +52,19 @@ export class BlogDetailComponent implements OnInit {
     });
   }
 
-  // 5. Added the Schema Generator Function
+  // Helper to ensure image URLs are correct
+  getImageUrl(url: string): string {
+    if (!url) return 'https://placehold.co/600x400?text=No+Image';
+    return url;
+  }
+
   generateBlogSchema(blog: any) {
     const schemaJson = {
       "@context": "https://schema.org",
       "@type": "BlogPosting",
       "headline": blog.title,
       "description": blog.content ? blog.content.substring(0, 160) : '',
-      "image": [blog.imageUrl, blog.imageUrl2].filter(img => img),
+      "image": [this.getImageUrl(blog.imageUrl), this.getImageUrl(blog.imageUrl2)].filter(img => img),
       "author": {
         "@type": "Person",
         "name": blog.author || "La Hermosa Admin"
@@ -74,7 +80,8 @@ export class BlogDetailComponent implements OnInit {
       "datePublished": blog.createdAt || new Date().toISOString(),
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": `https://lahermosa.shop/blog-detail/${blog._id}`
+        // Matched URL to blogs/:id route for SEO consistency
+        "@id": `https://lahermosa.shop/blogs/${blog._id || blog.id}`
       }
     };
 
