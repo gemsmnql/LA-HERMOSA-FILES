@@ -71,14 +71,14 @@ app.post('/api/admin/login', async (req, res) => {
     }
 });
 
-// --- CREATE BLOG (Updated for File Upload) ---
+// --- CREATE BLOG (Updated for File Upload & Production URLs) ---
 app.post('/api/blogs', upload.fields([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, author, altText, header1, content, altText2, header2, content2, isFeatured } = req.body;
 
-        // Construct image URLs based on uploaded files
-        const imageUrl = req.files['image1'] ? `${req.protocol}://${req.get('host')}/uploads/${req.files['image1'][0].filename}` : '';
-        const imageUrl2 = req.files['image2'] ? `${req.protocol}://${req.get('host')}/uploads/${req.files['image2'][0].filename}` : '';
+        // Using hardcoded production URL to ensure images load correctly across all protocols
+        const imageUrl = req.files['image1'] ? `https://la-hermosa-files.onrender.com/uploads/${req.files['image1'][0].filename}` : '';
+        const imageUrl2 = req.files['image2'] ? `https://la-hermosa-files.onrender.com/uploads/${req.files['image2'][0].filename}` : '';
 
         const newBlog = new Blog({
             title,
@@ -101,18 +101,18 @@ app.post('/api/blogs', upload.fields([{ name: 'image1', maxCount: 1 }, { name: '
     }
 });
 
-// --- UPDATE BLOG (Edit Feature) ---
+// --- UPDATE BLOG (Edit Feature - Updated for Production URLs) ---
 app.put('/api/blogs/:id', upload.fields([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }]), async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = { ...req.body };
 
-        // Handle File Updates if new ones are provided
+        // Handle File Updates using production URL
         if (req.files['image1']) {
-            updateData.imageUrl = `${req.protocol}://${req.get('host')}/uploads/${req.files['image1'][0].filename}`;
+            updateData.imageUrl = `https://la-hermosa-files.onrender.com/uploads/${req.files['image1'][0].filename}`;
         }
         if (req.files['image2']) {
-            updateData.imageUrl2 = `${req.protocol}://${req.get('host')}/uploads/${req.files['image2'][0].filename}`;
+            updateData.imageUrl2 = `https://la-hermosa-files.onrender.com/uploads/${req.files['image2'][0].filename}`;
         }
 
         updateData.isFeatured = updateData.isFeatured === true || updateData.isFeatured === 'true';
@@ -158,7 +158,7 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
     }
 });
 
-// --- SITEMAP GENERATION WITH LASTMOD ---
+// --- SITEMAP GENERATION (Corrected to /blogs/ route) ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const blogs = await Blog.find({}, '_id createdAt');
@@ -188,7 +188,7 @@ app.get('/sitemap.xml', async (req, res) => {
             const blogDate = blog.createdAt ? new Date(blog.createdAt).toISOString().split('T')[0] : today;
             xml += `
           <url>
-            <loc>https://lahermosa.shop/blog-detail/${blog._id}</loc>
+            <loc>https://lahermosa.shop/blogs/${blog._id}</loc>
             <lastmod>${blogDate}</lastmod>
             <priority>0.7</priority>
           </url>`;
