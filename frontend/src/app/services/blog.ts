@@ -8,28 +8,28 @@ import { Observable, map } from 'rxjs';
 export class BlogService {
   private http = inject(HttpClient);
   
-  // Detect if you are on localhost
   private isLocal = window.location.hostname === 'localhost';
 
-  // API switches between local and live automatically
   private apiUrl = this.isLocal 
     ? 'http://localhost:3000/api/blogs' 
     : 'https://la-hermosa-files.onrender.com/api/blogs';
 
   /**
-   * Fixes image URLs by ensuring they point to the correct server
-   * regardless of what is stored in the database.
+   * Smart image fixer that identifies Cloudinary URLs vs local paths
    */
   private fixImageUrl(url: string): string {
     if (!url) return 'https://placehold.co/600x400?text=No+Image';
 
-    // 1. Extract just the filename (in case it's a full URL or a path)
-    const filename = url.split('/').pop();
+    // 1. If it's a full Cloudinary URL (starts with http), return it as is!
+    if (url.startsWith('http')) {
+      return url;
+    }
 
-    // 2. Select the correct base based on your environment
+    // 2. If it's an old relative path (like /uploads/filename.jpg), fix the base domain
+    const filename = url.split('/').pop();
     const base = this.isLocal 
       ? 'http://localhost:3000' 
-      : 'https://la-hermosa-files.onrender.com';
+      : 'https://la-her-mosa-files.onrender.com';
 
     return `${base}/uploads/${filename}`;
   }
@@ -63,7 +63,6 @@ export class BlogService {
   }
 
   deleteBlog(id: string): Observable<any> {
-    // Note: It's safer to use the specific apiUrl for the delete endpoint
     return this.http.post(`${this.apiUrl}/delete/${id}`, {});
   }
 }
