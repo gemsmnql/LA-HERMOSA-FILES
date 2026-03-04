@@ -71,14 +71,14 @@ app.post('/api/admin/login', async (req, res) => {
     }
 });
 
-// --- CREATE BLOG (Updated for File Upload & Production URLs) ---
+// --- CREATE BLOG (Saves relative paths for portability) ---
 app.post('/api/blogs', upload.fields([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, author, altText, header1, content, altText2, header2, content2, isFeatured } = req.body;
 
-        // Using hardcoded production URL to ensure images load correctly across all protocols
-        const imageUrl = req.files['image1'] ? `https://la-hermosa-files.onrender.com/uploads/${req.files['image1'][0].filename}` : '';
-        const imageUrl2 = req.files['image2'] ? `https://la-hermosa-files.onrender.com/uploads/${req.files['image2'][0].filename}` : '';
+        // Save only the relative path. Your Angular BlogService will prep the correct Domain.
+        const imageUrl = req.files['image1'] ? `/uploads/${req.files['image1'][0].filename}` : '';
+        const imageUrl2 = req.files['image2'] ? `/uploads/${req.files['image2'][0].filename}` : '';
 
         const newBlog = new Blog({
             title,
@@ -101,18 +101,17 @@ app.post('/api/blogs', upload.fields([{ name: 'image1', maxCount: 1 }, { name: '
     }
 });
 
-// --- UPDATE BLOG (Edit Feature - Updated for Production URLs) ---
+// --- UPDATE BLOG (Handles File Updates with relative paths) ---
 app.put('/api/blogs/:id', upload.fields([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }]), async (req, res) => {
     try {
         const { id } = req.params;
         const updateData = { ...req.body };
 
-        // Handle File Updates using production URL
         if (req.files['image1']) {
-            updateData.imageUrl = `https://la-hermosa-files.onrender.com/uploads/${req.files['image1'][0].filename}`;
+            updateData.imageUrl = `/uploads/${req.files['image1'][0].filename}`;
         }
         if (req.files['image2']) {
-            updateData.imageUrl2 = `https://la-hermosa-files.onrender.com/uploads/${req.files['image2'][0].filename}`;
+            updateData.imageUrl2 = `/uploads/${req.files['image2'][0].filename}`;
         }
 
         updateData.isFeatured = updateData.isFeatured === true || updateData.isFeatured === 'true';
@@ -158,7 +157,7 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
     }
 });
 
-// --- SITEMAP GENERATION (Corrected to /blogs/ route) ---
+// --- SITEMAP GENERATION ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const blogs = await Blog.find({}, '_id createdAt');
