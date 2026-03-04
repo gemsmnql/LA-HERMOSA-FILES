@@ -8,31 +8,30 @@ import { Observable, map } from 'rxjs';
 export class BlogService {
   private http = inject(HttpClient);
   
-  // Base URL for the API
-  private apiUrl = 'https://la-hermosa-files.onrender.com/api/blogs';
+  // Check if we are on localhost
+  private isLocal = window.location.hostname === 'localhost';
+
+  // DYNAMIC API URL: Points to local backend if testing, Render if live
+  private apiUrl = this.isLocal 
+    ? 'http://localhost:3000/api/blogs' 
+    : 'https://la-hermosa-files.onrender.com/api/blogs';
 
   /**
-   * Smart URL Fixer:
-   * 1. Detects if the app is running locally or in production.
-   * 2. Replaces broken 'localhost' database entries with the correct live URL when in production.
-   * 3. Ensures local uploads work when testing on your device.
+   * Smart URL Fixer
    */
   private fixImageUrl(url: string): string {
     if (!url) return 'https://placehold.co/600x400?text=No+Image';
 
-    const isLocalFrontend = window.location.hostname === 'localhost';
     const filename = url.split('/').pop();
 
-    // If you are testing locally (localhost:4200)
-    if (isLocalFrontend) {
-      // Point to your local backend (change 3000 to your backend port if different)
+    if (this.isLocal) {
+      // When testing locally, always look at the local uploads folder
       return `http://localhost:3000/uploads/${filename}`;
     }
 
-    // If you are on the live site (lahermosa.shop)
-    // Force the Render URL if the database has 'localhost' or relative paths
+    // When live, ensure we point to Render even if the DB has 'localhost' entries
     if (url.includes('localhost') || !url.startsWith('http')) {
-      return `https://la-her-mosa-files.onrender.com/uploads/${filename}`;
+      return `https://la-hermosa-files.onrender.com/uploads/${filename}`;
     }
 
     return url;
