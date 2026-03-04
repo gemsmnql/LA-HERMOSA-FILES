@@ -23,7 +23,6 @@ export class BlogDetailComponent implements OnInit {
   dynamicSchema: SafeHtml | undefined;
 
   ngOnInit() {
-    // Correctly getting ID from the 'blogs/:id' route
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.fetchBlogDetail(id);
@@ -34,15 +33,14 @@ export class BlogDetailComponent implements OnInit {
     this.isLoading = true;
     this.blogService.getBlogById(id).subscribe({
       next: (data) => {
-        setTimeout(() => {
-          this.blog = data;
-          this.isLoading = false;
-          
-          // Generate the Schema when data arrives
-          this.generateBlogSchema(data); 
-          
-          this.cdr.detectChanges(); 
-        }, 500);
+        // The service has already fixed the imageUrls in 'data'
+        this.blog = data;
+        this.isLoading = false;
+        
+        // Generate the Schema when data arrives
+        this.generateBlogSchema(data); 
+        
+        this.cdr.detectChanges(); 
       },
       error: (err) => {
         console.error('Error fetching blog detail:', err);
@@ -52,10 +50,12 @@ export class BlogDetailComponent implements OnInit {
     });
   }
 
-  // Helper to ensure image URLs are correct
+  /**
+   * Helper to handle fallback if image is missing.
+   * Note: fixImageUrl in the service handles URL structure.
+   */
   getImageUrl(url: string): string {
-    if (!url) return 'https://placehold.co/600x400?text=No+Image';
-    return url;
+    return url || 'https://placehold.co/600x400?text=No+Image';
   }
 
   generateBlogSchema(blog: any) {
@@ -80,7 +80,6 @@ export class BlogDetailComponent implements OnInit {
       "datePublished": blog.createdAt || new Date().toISOString(),
       "mainEntityOfPage": {
         "@type": "WebPage",
-        // Matched URL to blogs/:id route for SEO consistency
         "@id": `https://lahermosa.shop/blogs/${blog._id || blog.id}`
       }
     };
