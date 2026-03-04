@@ -8,33 +8,30 @@ import { Observable, map } from 'rxjs';
 export class BlogService {
   private http = inject(HttpClient);
   
-  // Check if we are on localhost
+  // Detect if you are on localhost
   private isLocal = window.location.hostname === 'localhost';
 
-  // DYNAMIC API URL: Points to local backend if testing, Render if live
+  // API switches between local and live automatically
   private apiUrl = this.isLocal 
     ? 'http://localhost:3000/api/blogs' 
     : 'https://la-hermosa-files.onrender.com/api/blogs';
 
   /**
-   * Smart URL Fixer
+   * Fixes image URLs by ensuring they point to the correct server
+   * regardless of what is stored in the database.
    */
   private fixImageUrl(url: string): string {
     if (!url) return 'https://placehold.co/600x400?text=No+Image';
 
+    // 1. Extract just the filename (in case it's a full URL or a path)
     const filename = url.split('/').pop();
 
-    if (this.isLocal) {
-      // When testing locally, always look at the local uploads folder
-      return `http://localhost:3000/uploads/${filename}`;
-    }
+    // 2. Select the correct base based on your environment
+    const base = this.isLocal 
+      ? 'http://localhost:3000' 
+      : 'https://la-hermosa-files.onrender.com';
 
-    // When live, ensure we point to Render even if the DB has 'localhost' entries
-    if (url.includes('localhost') || !url.startsWith('http')) {
-      return `https://la-hermosa-files.onrender.com/uploads/${filename}`;
-    }
-
-    return url;
+    return `${base}/uploads/${filename}`;
   }
 
   getBlogs(): Observable<any[]> {
@@ -66,6 +63,7 @@ export class BlogService {
   }
 
   deleteBlog(id: string): Observable<any> {
+    // Note: It's safer to use the specific apiUrl for the delete endpoint
     return this.http.post(`${this.apiUrl}/delete/${id}`, {});
   }
 }
