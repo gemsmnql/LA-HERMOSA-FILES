@@ -8,7 +8,7 @@ import { BlogDetailComponent } from './blogs/blog-detail/blog-detail';
 import { ShopDetail } from './shop/shop-detail/shop-detail';
 
 export const routes: Routes = [
-    { path: '', component: Home },
+    { path: 'home', component: Home },
     { path: 'shop', component: Shop },
     { path: 'features', component: Features },
     { path: 'contact', component: Contact },
