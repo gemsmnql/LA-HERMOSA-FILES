@@ -10,22 +10,33 @@ const multer = require('multer');
 const cloudinary = require('cloudinary').v2;
 const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
-
 const app = express();
 
+// --- HELPERS ---
+const slugify = (text) => {
+    if (!text) return ''; // Prevent crash if title is missing
+    return text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')     
+        .replace(/[^\w-]+/g, '')   
+        .replace(/--+/g, '-')
+        .replace(/^-+/, '')       // Trim - from start
+        .replace(/-+$/, '');      // Trim - from end
+};
+
 // --- CLOUDINARY CONFIGURATION ---
-// These must be set in your .env file or Render Environment Variables
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
-// Configure Multer to upload directly to Cloudinary
 const storage = new CloudinaryStorage({
     cloudinary: cloudinary,
     params: {
-        folder: 'la_hermosa_blogs', // Folder name in Cloudinary
+        folder: 'la_hermosa_blogs',
         allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
     },
 });
@@ -45,8 +56,6 @@ app.use(cors({
 
 app.use(express.json());
 
-// Note: Local static serving is no longer needed for new uploads, 
-// but we keep this for any old images still in your database.
 const path = require('path');
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -75,24 +84,33 @@ app.post('/api/admin/login', async (req, res) => {
     }
 });
 
-// --- CREATE BLOG (Now saves full Cloudinary URLs) ---
+// --- CREATE BLOG ---
 app.post('/api/blogs', upload.fields([{ name: 'image1', maxCount: 1 }, { name: 'image2', maxCount: 1 }]), async (req, res) => {
     try {
         const { title, author, altText, header1, content, altText2, header2, content2, isFeatured } = req.body;
 
-        // Cloudinary provides the full secure URL in the .path property
         const imageUrl = req.files['image1'] ? req.files['image1'][0].path : '';
         const imageUrl2 = req.files['image2'] ? req.files['image2'][0].path : '';
 
+        // Generate unique slug
+        let generatedSlug = slugify(title);
+        const slugExists = await Blog.findOne({ slug: generatedSlug });
+        if (slugExists) {
+            generatedSlug = `${generatedSlug}-${Date.now()}`; // Add timestamp if title exists
+        }
+
         const newBlog = new Blog({
-            title, author, imageUrl, altText, header1, content,
+            title, 
+            slug: generatedSlug,
+            author, imageUrl, altText, header1, content,
             imageUrl2, altText2, header2, content2,
             isFeatured: isFeatured === true || isFeatured === 'true'
         });
 
         await newBlog.save();
-        res.status(201).json({ message: "Blog posted successfully to Cloud!" });
+        res.status(201).json({ message: "Blog posted successfully!" });
     } catch (err) {
+        console.error("Save Error:", err);
         res.status(500).json({ message: "Error saving blog", error: err.message });
     }
 });
@@ -103,6 +121,10 @@ app.put('/api/blogs/:id', upload.fields([{ name: 'image1', maxCount: 1 }, { name
         const { id } = req.params;
         const updateData = { ...req.body };
 
+        if (updateData.title) {
+            updateData.slug = slugify(updateData.title);
+        }
+        
         if (req.files['image1']) updateData.imageUrl = req.files['image1'][0].path;
         if (req.files['image2']) updateData.imageUrl2 = req.files['image2'][0].path;
 
@@ -128,9 +150,14 @@ app.get('/api/blogs', async (req, res) => {
 });
 
 // --- GET SINGLE BLOG DETAIL ---
-app.get('/api/blogs/:id', async (req, res) => {
+app.get('/api/blogs/:identifier', async (req, res) => {
     try {
-        const blog = await Blog.findById(req.params.id);
+        let blog = await Blog.findOne({ slug: req.params.identifier });
+        
+        if (!blog && mongoose.Types.ObjectId.isValid(req.params.identifier)) {
+            blog = await Blog.findById(req.params.identifier);
+        }
+
         if (!blog) return res.status(404).json({ message: "Blog not found" });
         res.json(blog);
     } catch (err) {
@@ -143,7 +170,7 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
     try {
         const { id } = req.params;
         await Blog.findByIdAndDelete(id);
-        res.json({ message: "Deleted from Database" });
+        res.json({ message: "Deleted successfully" });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
@@ -152,7 +179,7 @@ app.post('/api/blogs/delete/:id', async (req, res) => {
 // --- SITEMAP GENERATION ---
 app.get('/sitemap.xml', async (req, res) => {
     try {
-        const blogs = await Blog.find({}, '_id createdAt');
+        const blogs = await Blog.find({}, 'slug _id createdAt');
         const today = new Date().toISOString().split('T')[0];
         let xml = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
         const staticPages = [
@@ -167,7 +194,8 @@ app.get('/sitemap.xml', async (req, res) => {
         });
         blogs.forEach(blog => {
             const blogDate = blog.createdAt ? new Date(blog.createdAt).toISOString().split('T')[0] : today;
-            xml += `<url><loc>https://lahermosa.shop/blogs/${blog._id}</loc><lastmod>${blogDate}</lastmod><priority>0.7</priority></url>`;
+            const blogUrl = blog.slug || blog._id;
+            xml += `<url><loc>https://lahermosa.shop/blogs/${blogUrl}</loc><lastmod>${blogDate}</lastmod><priority>0.7</priority></url>`;
         });
         xml += `</urlset>`;
         res.header('Content-Type', 'application/xml').send(xml);
