@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const blogSchema = new mongoose.Schema({
   title: String,
-  author: { type: String, default: 'Admin' }, // Added to ensure custom names are saved
+  slug: { type: String, unique: true, sparse: true },
+  author: { type: String, default: 'Admin' },
   imageUrl: String,
   altText: String,    
   header1: String,
