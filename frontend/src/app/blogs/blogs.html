@@ -42,7 +42,7 @@
             </div>
 
             <div *ngIf="!isLoading && blogPosts.length > 0" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-8 responsive-grid animate-in fade-in duration-700">
-                <article *ngFor="let article of blogPosts" [routerLink]="['/blogs', article._id || article.id]"
+                <article *ngFor="let article of blogPosts; trackBy: trackByBlog" [routerLink]="['/blogs', article.slug || article._id]"
                     class="group rounded-2xl overflow-hidden shadow-lg relative transition duration-500 hover:shadow-2xl cursor-pointer responsive-card">
                     <img [src]="getImageUrl(article.imageUrl)" [alt]="article.altText || ''" 
                          class="w-full h-[420px] object-cover transition duration-500 group-hover:scale-110"
@@ -59,7 +59,7 @@
 
         <div class="w-1/4 space-y-10 sidebar-column">
             <div *ngIf="!isLoading && featuredPosts.length > 0" class="space-y-6 animate-in fade-in duration-700">
-                <div *ngFor="let item of featuredPosts" [routerLink]="['/blogs', item._id || item.id]"
+                <div *ngFor="let item of featuredPosts; trackBy: trackByBlog" [routerLink]="['/blogs', item.slug || item._id]"
                      class="group flex gap-4 p-3 rounded-xl transition hover:bg-gray-100 cursor-pointer">
                     <img [src]="getImageUrl(item.imageUrl)" [alt]="item.altText || ''" 
                          class="w-20 h-20 object-cover rounded-xl shadow-sm">
@@ -76,7 +76,7 @@
                     <div class="h-[2px] bg-gray-300 w-full ml-6"></div>
                 </div>
                 <div class="space-y-6">
-                    <div *ngFor="let item of latestPosts" [routerLink]="['/blogs', item._id || item.id]"
+                    <div *ngFor="let item of latestPosts; trackBy: trackByBlog" [routerLink]="['/blogs', item.slug || item._id]"
                          class="flex gap-4 group cursor-pointer p-3 rounded-xl transition hover:bg-gray-100">
                         <img [src]="getImageUrl(item.imageUrl)" [alt]="item.altText || ''" 
                              class="w-20 h-20 object-cover rounded-xl">
