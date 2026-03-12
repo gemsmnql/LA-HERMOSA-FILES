@@ -185,7 +185,7 @@ app.get('/sitemap.xml', async (req, res) => {
         const staticPages = [
             { url: '', priority: '1.0' },
             { url: 'shop', priority: '0.8' },
-            { url: 'blog', priority: '0.8' },
+            { url: 'blogs', priority: '0.8' },
             { url: 'contact', priority: '0.5' },
             { url: 'features', priority: '0.5' }
         ];
